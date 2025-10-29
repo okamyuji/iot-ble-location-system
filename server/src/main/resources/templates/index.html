@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT BLE Location Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .locations-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .locations-table thead {
+            background: #667eea;
+            color: white;
+        }
+        
+        .locations-table th,
+        .locations-table td {
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .locations-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .device-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌍 IoT BLE Location Tracker</h1>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3 th:text="${deviceCount}">0</h3>
+                <p>登録デバイス数</p>
+            </div>
+            <div class="stat-card">
+                <h3 th:text="${locationCount}">0</h3>
+                <p>位置情報データ数</p>
+            </div>
+        </div>
+        
+        <div class="content">
+            <h2>📍 最新の位置情報</h2>
+            
+            <table th:if="${!locations.isEmpty()}" class="locations-table">
+                <thead>
+                    <tr>
+                        <th>デバイスID</th>
+                        <th>緯度</th>
+                        <th>経度</th>
+                        <th>高度</th>
+                        <th>RSSI</th>
+                        <th>タイムスタンプ (JST)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="location : ${locations}">
+                        <td>
+                            <span class="device-badge" th:text="${location.deviceId}"></span>
+                        </td>
+                        <td th:text="${#numbers.formatDecimal(location.latitude, 1, 6)}"></td>
+                        <td th:text="${#numbers.formatDecimal(location.longitude, 1, 6)}"></td>
+                        <td th:text="${location.altitude != null ? #numbers.formatDecimal(location.altitude, 1, 1) + 'm' : '-'}"></td>
+                        <td th:text="${location.rssi != null ? location.rssi + ' dBm' : '-'}"></td>
+                        <td th:text="${location.timestampJst}"></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p th:if="${locations.isEmpty()}">データがありません</p>
+        </div>
+    </div>
+</body>
+</html>
