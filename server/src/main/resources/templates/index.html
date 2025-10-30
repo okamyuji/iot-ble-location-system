@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IoT BLE Location Tracker</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+          crossorigin=""/>
+    
+    <!-- Leaflet MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    
     <style>
         * {
             margin: 0;
@@ -96,6 +106,185 @@
             border-radius: 5px;
             font-size: 0.9em;
         }
+        
+        /* Map Styles */
+        .map-container {
+            padding: 30px;
+            background: white;
+        }
+        
+        #map {
+            height: 600px;
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .map-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .control-group select,
+        .control-group button {
+            padding: 8px 15px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            background: white;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+        
+        .control-group select:hover,
+        .control-group button:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .control-group button.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .legend {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .legend h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+        
+        .timeline-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .timeline-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .timeline-slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .timeline-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .timeline-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .play-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .play-button:hover {
+            background: #764ba2;
+            transform: scale(1.1);
+        }
+        
+        .timeline-info {
+            color: #667eea;
+            font-weight: 600;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .speed-control {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .speed-btn {
+            padding: 5px 10px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            background: white;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+        
+        .speed-btn.active {
+            background: #667eea;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -112,6 +301,61 @@
             <div class="stat-card">
                 <h3 th:text="${locationCount}">0</h3>
                 <p>位置情報データ数</p>
+            </div>
+        </div>
+        
+        <!-- Map Section -->
+        <div class="map-container">
+            <h2>🗺️ 位置情報マップ</h2>
+            
+            <!-- Map Controls -->
+            <div class="map-controls">
+                <div class="control-group">
+                    <label for="deviceFilter">デバイス:</label>
+                    <select id="deviceFilter">
+                        <option value="all">すべて表示</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <button id="showTrailBtn" onclick="toggleTrail()">軌跡表示</button>
+                </div>
+                
+                <div class="control-group">
+                    <button id="showHeatmapBtn" onclick="toggleHeatmap()">ヒートマップ</button>
+                </div>
+                
+                <div class="control-group">
+                    <button id="autoRefreshBtn" class="active" onclick="toggleAutoRefresh()">自動更新: ON</button>
+                </div>
+            </div>
+            
+            <!-- Legend -->
+            <div class="legend">
+                <h3>📌 凡例</h3>
+                <div class="legend-items" id="legendItems">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+            
+            <!-- Map -->
+            <div id="map"></div>
+            
+            <!-- Timeline Controls -->
+            <div class="timeline-container">
+                <h3>⏱️ タイムライン再生</h3>
+                <div class="timeline-controls">
+                    <button class="play-button" id="playBtn" onclick="togglePlayback()">▶️</button>
+                    <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="100" value="100" />
+                    <div class="timeline-info" id="timelineInfo">現在時刻</div>
+                </div>
+                <div class="speed-control">
+                    <span style="color: #667eea; font-weight: 600; margin-right: 10px;">再生速度:</span>
+                    <button class="speed-btn" onclick="setSpeed(0.5)">0.5x</button>
+                    <button class="speed-btn active" onclick="setSpeed(1)">1x</button>
+                    <button class="speed-btn" onclick="setSpeed(2)">2x</button>
+                    <button class="speed-btn" onclick="setSpeed(5)">5x</button>
+                </div>
             </div>
         </div>
         
@@ -146,5 +390,417 @@
             <p th:if="${locations.isEmpty()}">データがありません</p>
         </div>
     </div>
+    
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+            crossorigin=""></script>
+    
+    <!-- Leaflet MarkerCluster JavaScript -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    
+    <!-- Leaflet Heat JavaScript -->
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // グローバル変数
+        let map;
+        let markers = L.markerClusterGroup();
+        let trailLayers = {};
+        let heatmapLayer;
+        let allLocationData = [];
+        let deviceColors = {};
+        let colorPalette = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+            '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788'
+        ];
+        let autoRefreshInterval;
+        let isAutoRefresh = true;
+        let showTrail = false;
+        let showHeatmap = false;
+        let isPlaying = false;
+        let playbackSpeed = 1;
+        let playbackInterval;
+        let timelineData = [];
+        
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            loadLocationData();
+            startAutoRefresh();
+        });
+        
+        // 地図初期化
+        function initMap() {
+            map = L.map('map').setView([35.6812, 139.7671], 13); // 東京を初期中心に
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            map.addLayer(markers);
+        }
+        
+        // 位置情報データ読み込み
+        async function loadLocationData() {
+            try {
+                const response = await fetch('/api/locations/recent');
+                const data = await response.json();
+                allLocationData = data;
+                updateMap();
+                updateDeviceFilter();
+                updateLegend();
+                updateTimeline();
+            } catch (error) {
+                console.error('位置情報の読み込みに失敗:', error);
+            }
+        }
+        
+        // 地図更新
+        function updateMap() {
+            markers.clearLayers();
+            Object.values(trailLayers).forEach(layer => map.removeLayer(layer));
+            trailLayers = {};
+            
+            const selectedDevice = document.getElementById('deviceFilter').value;
+            const filteredData = selectedDevice === 'all' 
+                ? allLocationData 
+                : allLocationData.filter(loc => loc.deviceId === selectedDevice);
+            
+            // デバイスごとに最新位置を取得
+            const latestByDevice = {};
+            filteredData.forEach(loc => {
+                if (!latestByDevice[loc.deviceId] || 
+                    new Date(loc.timestamp) > new Date(latestByDevice[loc.deviceId].timestamp)) {
+                    latestByDevice[loc.deviceId] = loc;
+                }
+            });
+            
+            // マーカー追加
+            Object.values(latestByDevice).forEach(loc => {
+                const color = getDeviceColor(loc.deviceId);
+                const marker = createMarker(loc, color);
+                markers.addLayer(marker);
+            });
+            
+            // 軌跡表示
+            if (showTrail) {
+                drawTrails(filteredData);
+            }
+            
+            // ヒートマップ表示
+            if (showHeatmap) {
+                drawHeatmap(filteredData);
+            }
+            
+            // 地図の中心とズームを調整
+            if (markers.getLayers().length > 0) {
+                map.fitBounds(markers.getBounds(), { padding: [50, 50] });
+            }
+        }
+        
+        // マーカー作成
+        function createMarker(location, color) {
+            const icon = L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+            
+            const marker = L.marker([location.latitude, location.longitude], { icon: icon });
+            
+            const popupContent = `
+                <div style="min-width: 200px;">
+                    <h4 style="color: ${color}; margin: 0 0 10px 0;">📱 ${location.deviceId}</h4>
+                    <p style="margin: 5px 0;"><strong>緯度:</strong> ${location.latitude.toFixed(6)}</p>
+                    <p style="margin: 5px 0;"><strong>経度:</strong> ${location.longitude.toFixed(6)}</p>
+                    ${location.altitude ? `<p style="margin: 5px 0;"><strong>高度:</strong> ${location.altitude.toFixed(1)}m</p>` : ''}
+                    ${location.rssi ? `<p style="margin: 5px 0;"><strong>RSSI:</strong> ${location.rssi} dBm</p>` : ''}
+                    <p style="margin: 5px 0;"><strong>時刻:</strong> ${formatTimestamp(location.timestamp)}</p>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+            return marker;
+        }
+        
+        // デバイス色取得
+        function getDeviceColor(deviceId) {
+            if (!deviceColors[deviceId]) {
+                const colorIndex = Object.keys(deviceColors).length % colorPalette.length;
+                deviceColors[deviceId] = colorPalette[colorIndex];
+            }
+            return deviceColors[deviceId];
+        }
+        
+        // 軌跡描画
+        function drawTrails(data) {
+            const deviceTrails = {};
+            
+            data.forEach(loc => {
+                if (!deviceTrails[loc.deviceId]) {
+                    deviceTrails[loc.deviceId] = [];
+                }
+                deviceTrails[loc.deviceId].push([loc.latitude, loc.longitude]);
+            });
+            
+            Object.entries(deviceTrails).forEach(([deviceId, coords]) => {
+                if (coords.length > 1) {
+                    const color = getDeviceColor(deviceId);
+                    const polyline = L.polyline(coords, {
+                        color: color,
+                        weight: 3,
+                        opacity: 0.7
+                    }).addTo(map);
+                    
+                    trailLayers[deviceId] = polyline;
+                }
+            });
+        }
+        
+        // ヒートマップ描画
+        function drawHeatmap(data) {
+            if (heatmapLayer) {
+                map.removeLayer(heatmapLayer);
+            }
+            
+            const heatData = data.map(loc => [loc.latitude, loc.longitude, 1]);
+            heatmapLayer = L.heatLayer(heatData, {
+                radius: 25,
+                blur: 15,
+                maxZoom: 17,
+                gradient: {
+                    0.0: 'blue',
+                    0.5: 'lime',
+                    0.7: 'yellow',
+                    1.0: 'red'
+                }
+            }).addTo(map);
+        }
+        
+        // デバイスフィルター更新
+        function updateDeviceFilter() {
+            const select = document.getElementById('deviceFilter');
+            const currentValue = select.value;
+            
+            // 既存のオプションをクリア（最初のオプション以外）
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+            
+            // デバイスIDを抽出
+            const deviceIds = [...new Set(allLocationData.map(loc => loc.deviceId))];
+            deviceIds.forEach(deviceId => {
+                const option = document.createElement('option');
+                option.value = deviceId;
+                option.textContent = deviceId;
+                select.appendChild(option);
+            });
+            
+            // 前の選択を復元
+            if (currentValue && deviceIds.includes(currentValue)) {
+                select.value = currentValue;
+            }
+            
+            // イベントリスナー
+            select.onchange = updateMap;
+        }
+        
+        // 凡例更新
+        function updateLegend() {
+            const legendItems = document.getElementById('legendItems');
+            legendItems.innerHTML = '';
+            
+            Object.entries(deviceColors).forEach(([deviceId, color]) => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `
+                    <div class="legend-color" style="background-color: ${color};"></div>
+                    <span>${deviceId}</span>
+                `;
+                legendItems.appendChild(item);
+            });
+        }
+        
+        // タイムライン更新
+        function updateTimeline() {
+            if (allLocationData.length === 0) return;
+            
+            // タイムスタンプでソート
+            timelineData = [...allLocationData].sort((a, b) => 
+                new Date(a.timestamp) - new Date(b.timestamp)
+            );
+            
+            const slider = document.getElementById('timelineSlider');
+            slider.max = timelineData.length - 1;
+            slider.value = timelineData.length - 1;
+            
+            slider.oninput = function() {
+                updateTimelineView(parseInt(this.value));
+            };
+            
+            updateTimelineInfo();
+        }
+        
+        // タイムライン表示更新
+        function updateTimelineView(index) {
+            if (index < 0 || index >= timelineData.length) return;
+            
+            const currentTime = new Date(timelineData[index].timestamp);
+            const filteredData = timelineData.filter(loc => 
+                new Date(loc.timestamp) <= currentTime
+            );
+            
+            // 一時的にallLocationDataを置き換え
+            const originalData = allLocationData;
+            allLocationData = filteredData;
+            updateMap();
+            allLocationData = originalData;
+            
+            updateTimelineInfo();
+        }
+        
+        // タイムライン情報更新
+        function updateTimelineInfo() {
+            const slider = document.getElementById('timelineSlider');
+            const index = parseInt(slider.value);
+            const info = document.getElementById('timelineInfo');
+            
+            if (index >= timelineData.length - 1) {
+                info.textContent = '現在時刻';
+            } else if (timelineData.length > 0) {
+                info.textContent = formatTimestamp(timelineData[index].timestamp);
+            }
+        }
+        
+        // 軌跡表示切り替え
+        function toggleTrail() {
+            showTrail = !showTrail;
+            const btn = document.getElementById('showTrailBtn');
+            btn.classList.toggle('active', showTrail);
+            updateMap();
+        }
+        
+        // ヒートマップ切り替え
+        function toggleHeatmap() {
+            showHeatmap = !showHeatmap;
+            const btn = document.getElementById('showHeatmapBtn');
+            btn.classList.toggle('active', showHeatmap);
+            
+            if (!showHeatmap && heatmapLayer) {
+                map.removeLayer(heatmapLayer);
+            } else {
+                updateMap();
+            }
+        }
+        
+        // 自動更新切り替え
+        function toggleAutoRefresh() {
+            isAutoRefresh = !isAutoRefresh;
+            const btn = document.getElementById('autoRefreshBtn');
+            
+            if (isAutoRefresh) {
+                btn.textContent = '自動更新: ON';
+                btn.classList.add('active');
+                startAutoRefresh();
+            } else {
+                btn.textContent = '自動更新: OFF';
+                btn.classList.remove('active');
+                stopAutoRefresh();
+            }
+        }
+        
+        // 自動更新開始
+        function startAutoRefresh() {
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            autoRefreshInterval = setInterval(() => {
+                if (isAutoRefresh) {
+                    loadLocationData();
+                }
+            }, 5000); // 5秒ごと
+        }
+        
+        // 自動更新停止
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+        
+        // 再生切り替え
+        function togglePlayback() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playBtn');
+            
+            if (isPlaying) {
+                btn.textContent = '⏸️';
+                startPlayback();
+            } else {
+                btn.textContent = '▶️';
+                stopPlayback();
+            }
+        }
+        
+        // 再生開始
+        function startPlayback() {
+            const slider = document.getElementById('timelineSlider');
+            
+            if (playbackInterval) clearInterval(playbackInterval);
+            
+            playbackInterval = setInterval(() => {
+                let currentValue = parseInt(slider.value);
+                currentValue++;
+                
+                if (currentValue >= timelineData.length) {
+                    currentValue = 0;
+                }
+                
+                slider.value = currentValue;
+                updateTimelineView(currentValue);
+            }, 1000 / playbackSpeed); // 速度に応じて調整
+        }
+        
+        // 再生停止
+        function stopPlayback() {
+            if (playbackInterval) {
+                clearInterval(playbackInterval);
+                playbackInterval = null;
+            }
+        }
+        
+        // 再生速度設定
+        function setSpeed(speed) {
+            playbackSpeed = speed;
+            
+            // ボタンのアクティブ状態更新
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 再生中なら再起動
+            if (isPlaying) {
+                stopPlayback();
+                startPlayback();
+            }
+        }
+        
+        // タイムスタンプフォーマット
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+        /*]]>*/
+    </script>
 </body>
 </html>
