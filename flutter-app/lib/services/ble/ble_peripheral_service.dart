@@ -92,12 +92,15 @@ class BlePeripheralService {
             'lat=${position.latitude}, lon=${position.longitude}, accuracy=${position.accuracy}');
       }
 
+      // positionToUseがnullの場合は既にreturnしているため、ここでは必ずnon-null
+      if (positionToUse == null) return;
+
       // 実際のGPS位置情報を使用
       final location = LocationData(
         deviceId: 'iOS-BLE-Beacon',
-        latitude: positionToUse!.latitude,
-        longitude: positionToUse!.longitude,
-        accuracy: positionToUse!.accuracy,
+        latitude: positionToUse.latitude,
+        longitude: positionToUse.longitude,
+        accuracy: positionToUse.accuracy,
         rssi: -60,
         timestamp: DateTime.now(),
       );
