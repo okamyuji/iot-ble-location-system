@@ -33,30 +33,29 @@ BLEデバイスから位置情報を収集し、リアルタイムで追跡・�
 
 ## システム構成
 
-```text
-┌─────────────┐        BLE         ┌──────────────┐
-│             │◄──────────────────►│              │
-│  ESP32/BLE  │                    │   Flutter    │
-│   Device    │                    │   Mobile     │
-│             │                    │     App      │
-└─────────────┘                    └──────┬───────┘
-                                          │
-                                          │ HTTP/REST
-                                          │
-                                   ┌──────▼───────┐
-                                   │              │
-                                   │ Spring Boot  │
-                                   │    Server    │
-                                   │              │
-                                   └──────┬───────┘
-                                          │
-                                          │ JPA
-                                          │
-                                   ┌──────▼───────┐
-                                   │              │
-                                   │  H2 Database │
-                                   │              │
-                                   └──────────────┘
+```mermaid
+graph TB
+    subgraph BLE["BLE通信"]
+        Device["ESP32/BLE Device"]
+    end
+    
+    subgraph Client["クライアント"]
+        App["Flutter Mobile App"]
+    end
+    
+    subgraph Backend["バックエンド"]
+        Server["Spring Boot Server"]
+        DB["H2 Database"]
+    end
+    
+    Device <-->|BLE| App
+    App -->|HTTP/REST| Server
+    Server -->|JPA| DB
+    
+    style Device fill:#ff9999
+    style App fill:#99ccff
+    style Server fill:#99ff99
+    style DB fill:#ffff99
 ```
 
 ## 主な機能
@@ -77,12 +76,24 @@ BLEデバイスから位置情報を収集し、リアルタイムで追跡・�
 
 ![送信側](./images/app_send.PNG) ![受信側](./images/app_recv.PNG)
 
-- BLEデバイスのスキャンと接続
-- 位置情報のリアルタイム受信
-- サーバーへの自動送信
-- 統計情報の表示
-- 環境別のサーバーURL設定
-- 設定・デバッグ画面
+#### 主要機能
+
+- BLE Central機能（受信側）
+  - BLEデバイスのスキャンと自動検出
+  - デバイス名フィルタリング（`IoT-BLE-`プレフィックス）
+  - 位置情報のリアルタイム受信
+  - サーバーへの自動送信
+  
+- BLE Peripheral機能（送信側）
+  - GPS位置情報の定期的なアドバタイズ（10秒間隔）
+  - 実際のGPS座標を使用
+  - バックグラウンド対応（最後の成功位置をキャッシュ）
+  
+- その他機能
+  - 統計情報の表示
+  - 環境別のサーバーURL設定
+  - 設定・デバッグ画面
+  - 包括的な権限管理（Bluetooth、位置情報、ローカルネットワーク）
 
 ## プロジェクト構成
 
@@ -184,7 +195,7 @@ cd flutter-app
 ./run_ios_simulator.sh 192.168.0.20
 ```
 
-**注意**: iOSでは `Info.plist` で許可されたIPアドレスのみHTTP通信が可能です。詳細は [iOS HTTP通信設定](#ios-http通信設定) を参照してください。
+注意: iOSでは `Info.plist` で許可されたIPアドレスのみHTTP通信が可能です。詳細は [iOS HTTP通信設定](#ios-http通信設定) を参照してください。
 
 #### 実機
 
@@ -298,7 +309,7 @@ curl http://localhost:8080/api/stats
 
 ##### 実行方法
 
-- **1. Androidエミュレータ**
+- Androidエミュレータ
 
 エミュレータからホストマシンの `localhost` にアクセスする場合、特別なIPアドレス `10.0.2.2` を使用します。
 
@@ -312,11 +323,11 @@ cd flutter-app
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
 ```
 
-- **2. iOSシミュレータ**
+- iOSシミュレータ
 
 シミュレータからホストマシンにアクセスする場合、開発マシンのIPアドレスを使用します。
 
-**重要**: iOSでは `Info.plist` で許可されたIPアドレスのみHTTP通信が可能です。デフォルトでは `192.168.0.15` が設定されています。
+重要: iOSでは `Info.plist` で許可されたIPアドレスのみHTTP通信が可能です。デフォルトでは `192.168.0.15` が設定されています。
 
 ```bash
 cd flutter-app
@@ -331,7 +342,7 @@ cd flutter-app
 flutter run --dart-define=API_BASE_URL=http://192.168.0.15:8080
 ```
 
-- **3. 実機（Android/iOS）**
+- 実機（Android/iOS）
 
 実機から開発マシンにアクセスする場合、開発マシンのローカルネットワーク上のIPアドレスを指定します。
 
@@ -348,9 +359,9 @@ cd flutter-app
 flutter run --dart-define=API_BASE_URL=http://192.168.0.15:8080
 ```
 
-**iOS実機の場合**: 新しいIPアドレスを使用する場合は、`flutter-app/ios/Runner/Info.plist` の `NSExceptionDomains` に追加してください。
+iOS実機の場合: 新しいIPアドレスを使用する場合は、`flutter-app/ios/Runner/Info.plist` の `NSExceptionDomains` に追加してください。
 
-- **開発マシンのIPアドレスを確認する方法**
+- 開発マシンのIPアドレスを確認する方法
 
 ```bash
 # macOS/Linux
@@ -360,7 +371,7 @@ ifconfig | grep "inet " | grep -v 127.0.0.1
 ipconfig | findstr IPv4
 ```
 
-- **4. 本番環境向けビルド**
+- 本番環境向けビルド
 
 ```bash
 cd flutter-app
@@ -374,7 +385,7 @@ flutter build ios --dart-define=API_BASE_URL=https://api.example.com
 
 ##### VS Code での設定
 
-`.vscode/launch.json` に設定を追加することで、VS Code から直接実行できます：
+`.vscode/launch.json` に設定を追加することで、VS Code から直接実行できます
 
 ```json
 {
@@ -420,15 +431,15 @@ iOSでは App Transport Security (ATS) により、デフォルトでHTTP通信�
 
 #### 現在の設定
 
-- **許可されているIPアドレス**
+- 許可されているIPアドレス
 
-`flutter-app/ios/Runner/Info.plist` で以下のIPアドレスがHTTP通信を許可されています：
+`flutter-app/ios/Runner/Info.plist` で以下のIPアドレスがHTTP通信を許可されています
 
-1. **192.168.0.15** (デフォルト設定)
-2. **localhost**
-3. **127.0.0.1**
+1. 192.168.0.15 (デフォルト設定)
+2. localhost
+3. 127.0.0.1
 
-- **セキュリティ設定**
+- セキュリティ設定
 
 - `NSAllowsArbitraryLoads`: `false` (すべてのHTTP通信を禁止)
 - `NSExceptionDomains`: 特定のIPアドレスのみ例外として許可
@@ -437,7 +448,7 @@ iOSでは App Transport Security (ATS) により、デフォルトでHTTP通信�
 
 #### 新しいIPアドレスを追加する方法
 
-- **1. Info.plist を編集**
+- Info.plist を編集
 
 `flutter-app/ios/Runner/Info.plist` を開き、`NSExceptionDomains` 内に新しいIPアドレスを追加します。
 
@@ -471,7 +482,7 @@ iOSでは App Transport Security (ATS) により、デフォルトでHTTP通信�
 </dict>
 ```
 
-- **2. アプリを再ビルド**
+- アプリを再ビルド
 
 Info.plist を変更した後は、必ずアプリを再ビルドしてください。
 
@@ -488,15 +499,15 @@ flutter pub get
 
 #### 設定パラメータの説明
 
-- **NSExceptionAllowsInsecureHTTPLoads**
+- NSExceptionAllowsInsecureHTTPLoads
   - `true`: このドメイン/IPアドレスでHTTP通信を許可
   - `false`: HTTPS通信のみ許可
 
-- **NSIncludesSubdomains**
+- NSIncludesSubdomains
   - `true`: サブドメインも含めて許可
   - `false`: 指定したドメイン/IPアドレスのみ許可
 
-- **NSExceptionMinimumTLSVersion**
+- NSExceptionMinimumTLSVersion
   - HTTPS通信時の最小TLSバージョンを指定（オプション）
   - `TLSv1.0`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`
 
@@ -526,7 +537,7 @@ mvn clean test jacoco:report
 
 #### アーキテクチャ
 
-このプロジェクトは、レイヤードアーキテクチャとDI（依存性注入）を採用しています：
+このプロジェクトは、レイヤードアーキテクチャとDI（依存性注入）を採用しています
 
 ```text
 Controller Layer (REST API)
@@ -538,7 +549,7 @@ Repository Layer (データアクセス) ← Interface
 Database (H2)
 ```
 
-**主要な設計原則:**
+主要な設計原則:
 
 - インターフェースベースのプログラミング
 - コンストラクタインジェクション（`@RequiredArgsConstructor`）
@@ -574,7 +585,7 @@ flutter test --coverage
 
 #### アーキテクチャ
 
-このプロジェクトは、Provider パターンを使用した状態管理を採用しています：
+このプロジェクトは、Provider パターンを使用した状態管理を採用しています
 
 ```text
 UI Layer (Screens/Widgets)
@@ -586,24 +597,281 @@ Service Layer (BLE/API)
 External (BLE Device / Server)
 ```
 
+#### BLE通信の設計と実装
+
+##### 概要
+
+このアプリは、BLE Central（受信側）とBLE Peripheral（送信側）の両方の役割を同時に実行できます。これにより、2台のiPhoneが互いに位置情報を送受信し、サーバーに自動送信することが可能です。
+
+##### アーキテクチャ
+
+```mermaid
+graph TB
+    subgraph FlutterApp["Flutter App"]
+        subgraph BLE["BLE機能"]
+            Central["BLE Central<br/>(受信側)<br/>・スキャン<br/>・デバイス検出<br/>・データ受信"]
+            Peripheral["BLE Peripheral<br/>(送信側)<br/>・アドバタイズ<br/>・GPS取得<br/>・位置情報送信"]
+        end
+        
+        Controller["LocationSyncController<br/>(状態管理)"]
+        ApiService["LocationApiService<br/>(HTTP通信)"]
+        
+        Central --> Controller
+        Peripheral --> Controller
+        Controller --> ApiService
+    end
+    
+    Server["Spring Boot Server"]
+    
+    ApiService -->|HTTP POST| Server
+    
+    style Central fill:#ffcccc
+    style Peripheral fill:#ccffcc
+    style Controller fill:#ccccff
+    style ApiService fill:#ffffcc
+    style Server fill:#99ff99
+```
+
+##### 主要コンポーネント
+
+- BLE Central（受信側）
+  - パッケージ: `flutter_blue_plus ^1.32.0`
+  - 実装: `lib/services/ble/ble_adapter.dart`
+  - 機能:
+    - Bluetoothアダプタの状態監視
+    - BLEデバイスのスキャン（フィルタリング付き）
+    - デバイス名による自動フィルタ（`IoT-BLE-`プレフィックス）
+    - スキャン結果のストリーム配信
+- BLE Peripheral（送信側）
+  - パッケージ: `flutter_ble_peripheral ^1.2.6`
+  - 実装: `lib/services/ble/ble_peripheral_service.dart`
+  - 機能:
+    - GPS位置情報の取得（`geolocator`）
+    - 10秒間隔での定期的なアドバタイズ
+    - 位置情報のJSON変換とManufacturer Dataへのエンコード
+    - GPS取得失敗時の最後の成功位置キャッシュ
+- 状態管理
+  - 実装: `lib/providers/location_sync_controller.dart`
+  - パターン: Provider + ChangeNotifier
+  - 責務:
+    - BLE Central/Peripheralの統合管理
+    - 検出デバイスの状態管理
+    - サーバーへの自動送信制御
+    - 重複送信の防止
+- HTTP通信
+  - 実装: `lib/services/location_api_service.dart`
+  - 機能:
+    - REST API通信
+    - タイムアウト設定（30秒）
+    - エラーハンドリング
+
+##### 通信フロー
+
+シナリオ1: デバイスA（送信側）→ デバイスB（受信側）→ サーバー
+
+```mermaid
+sequenceDiagram
+    participant A as デバイスA<br/>(送信側)
+    participant B as デバイスB<br/>(受信側)
+    participant S as サーバー
+    
+    Note over A: 1. GPS位置情報取得<br/>(geolocator)
+    
+    Note over A: 2. BLEアドバタイズ開始<br/>- Service UUID<br/>- Local Name: IoT-BLE-xxxx<br/>- Manufacturer Data (JSON)
+    A->>B: BLEアドバタイズ
+    
+    Note over B: 3. BLEスキャン<br/>- デバイス検出<br/>- 名前フィルタ
+    
+    Note over B: 4. 自分のGPS位置情報取得<br/>(受信側の位置)
+    
+    B->>S: 5. POST /api/locations<br/>- deviceId: デバイスBのID<br/>- latitude/longitude<br/>- detectedDevice: デバイスA
+    S-->>B: 6. 保存完了
+    
+    Note over A: 7. 10秒後に再アドバタイズ<br/>(繰り返し)
+```
+
+シナリオ2: 双方向通信（2台のiPhoneが互いに送受信）
+
+```mermaid
+sequenceDiagram
+    participant A as iPhone A<br/>(Central + Peripheral)
+    participant S as サーバー
+    participant B as iPhone B<br/>(Central + Peripheral)
+    
+    Note over A: 1. アドバタイズ開始<br/>(GPS位置A)
+    A->>B: BLEアドバタイズ
+    
+    Note over B: 2. アドバタイズ開始<br/>(GPS位置B)
+    B->>A: BLEアドバタイズ
+    
+    Note over A: 3. デバイスBを検出<br/>→ 自分のGPS取得<br/>→ サーバーに送信
+    A->>S: POST /api/locations<br/>(iPhone Aの位置)
+    
+    Note over B: 4. デバイスAを検出<br/>→ 自分のGPS取得<br/>→ サーバーに送信
+    B->>S: POST /api/locations<br/>(iPhone Bの位置)
+    
+    Note over S: 両方の位置情報を保存
+```
+
+##### BLEアドバタイズとは
+
+アドバタイズは、BLEデバイスが自分の存在を周囲に知らせるために、定期的に電波信号を発信する仕組みです。
+
+- 主要な特徴
+  - 一方向通信: Peripheral（送信側）→ Central（受信側）
+  - 接続不要: BLE接続せずに情報を送信
+  - 定期発信: このプロジェクトでは10秒間隔
+  - 低消費電力: 短時間の発信で省電力
+
+- アドバタイズパケットの内容
+
+| 項目 | 説明 | 例 |
+|------|------|-----|
+| Service UUID | サービスの識別子 | `0000180F-0000-1000-8000-00805F9B34FB` |
+| Local Name | デバイスの名前 | `IoT-BLE-Beacon` |
+| Manufacturer Data | カスタムデータ | JSON形式の位置情報 |
+
+- アドバタイズ vs BLE接続
+
+| 項目 | アドバタイズ | BLE接続 |
+|------|-------------|---------|
+| 通信方向 | 一方向 | 双方向 |
+| データ量 | 少量（最大31バイト） | 大量 |
+| 消費電力 | 非常に低い | 高い |
+| 接続 | 不要 | 必要 |
+| 用途 | ビーコン、存在通知 | データ転送、制御 |
+
+##### データフォーマット
+
+BLE Manufacturer Data（JSON形式）
+
+```json
+{
+  "deviceId": "iOS-BLE-Beacon",
+  "latitude": 35.681236,
+  "longitude": 139.767125,
+  "accuracy": 10.5,
+  "rssi": -60,
+  "timestamp": "2025-10-30T10:00:00.000Z"
+}
+```
+
+サーバーへのPOSTリクエスト
+
+```json
+{
+  "deviceId": "iPhone-Receiver-001",
+  "latitude": 35.465803,
+  "longitude": 139.622421,
+  "altitude": 12.0,
+  "accuracy": 8.0,
+  "rssi": -55,
+  "timestamp": "2025-10-30T10:00:00.000Z"
+}
+```
+
+##### 重要な実装ポイント
+
+- iOS制限への対応
+  - iOSのBLE Peripheralは、Manufacturer Dataを確実に送信できない制限があります
+  - そのため、受信側が検出時に自分のGPS位置を送信する方式を採用
+  - これにより、「誰が誰を検出したか」の情報がサーバーに蓄積されます
+- 重複送信の防止
+
+```dart
+// lib/providers/location_sync_controller.dart
+final Set<String> _sentDeviceIds = {};
+
+// デバイス検出時
+if (_sentDeviceIds.contains(device.deviceId)) {
+  return; // 既に送信済み
+}
+
+// GPS取得前に追加（重複リクエスト防止）
+_sentDeviceIds.add(device.deviceId);
+```
+
+- GPS取得の最適化
+
+```dart
+// lib/services/ble/ble_peripheral_service.dart
+Position? _lastKnownPosition; // キャッシュ
+
+// GPS取得失敗時
+if (position == null && _lastKnownPosition != null) {
+  // 最後の成功位置を使用
+  positionToUse = _lastKnownPosition;
+}
+```
+
+- 権限管理
+
+```dart
+// lib/main.dart
+Future<void> _requestPermissions() async {
+  if (Platform.isIOS) {
+    await Permission.bluetooth.request();
+  } else {
+    await Permission.bluetoothScan.request();
+    await Permission.bluetoothConnect.request();
+  }
+  await Permission.location.request();
+  await Permission.locationWhenInUse.request();
+}
+```
+
+##### 使用パッケージ
+
+| パッケージ | バージョン | 用途 |
+|-----------|-----------|------|
+| `flutter_blue_plus` | ^1.32.0 | BLE Central（スキャン・接続） |
+| `flutter_ble_peripheral` | ^1.2.6 | BLE Peripheral（アドバタイズ） |
+| `geolocator` | ^13.0.2 | GPS位置情報取得 |
+| `permission_handler` | ^11.3.0 | 権限管理 |
+| `provider` | ^6.1.0 | 状態管理 |
+| `http` | ^1.2.0 | HTTP通信 |
+
+##### トラブルシューティング
+
+BLEスキャンでデバイスが見つからない
+
+1. 両方のデバイスでBluetoothがONになっているか確認
+2. 位置情報の権限が許可されているか確認
+3. デバイス名が`IoT-BLE-`で始まっているか確認
+4. 送信側でアドバタイズが開始されているか確認（ログで確認）
+
+GPS位置情報が取得できない
+
+1. 位置情報サービスがONになっているか確認
+2. アプリに位置情報の権限が許可されているか確認
+3. 屋内の場合、GPS信号が弱い可能性があります（Wi-Fi測位も有効化）
+4. ログで`GPS位置情報取得成功`が出力されているか確認
+
+サーバーに送信されない
+
+1. サーバーが起動しているか確認
+2. ネットワーク接続を確認
+3. `Info.plist`（iOS）で該当IPアドレスが許可されているか確認
+4. 設定画面で「サーバー接続テスト」を実行
+
 ---
 
 ## テスト戦略
 
 ### サーバー側
 
-- **単体テスト**: すべてのレイヤーで実装
+- 単体テスト: すべてのレイヤーで実装
   - Controller: `@WebMvcTest` + `@MockitoBean`
   - Service: `@ExtendWith(MockitoExtension.class)` + `@Mock`
   - Repository: `@DataJpaTest`
-- **テストカバレッジ**: 正常系・異常系・境界値・エッジケース
-- **テストの組織化**: `@Nested` + `@DisplayName` で可読性向上
+- テストカバレッジ: 正常系・異常系・境界値・エッジケース
+- テストの組織化: `@Nested` + `@DisplayName` で可読性向上
 
 ### クライアント側
 
-- **ウィジェットテスト**: 主要画面のUI動作確認
-- **ユニットテスト**: サービス・モデルのロジック検証
-- **モックの活用**: HTTP・BLE通信のモック化
+- ウィジェットテスト: 主要画面のUI動作確認
+- ユニットテスト: サービス・モデルのロジック検証
+- モックの活用: HTTP・BLE通信のモック化
 
 ---
 
@@ -644,7 +912,7 @@ lsof -i :8080
 
 #### 2. プラットフォーム固有の設定確認
 
-**Android:**
+Android:
 
 - `flutter-app/android/app/src/main/AndroidManifest.xml` にインターネット権限があるか確認
 
@@ -654,17 +922,17 @@ lsof -i :8080
 
 - `flutter-app/android/app/src/main/res/xml/network_security_config.xml` でHTTP通信が許可されているか確認
 
-**iOS:**
+iOS:
 
 - `flutter-app/ios/Runner/Info.plist` で使用するIPアドレスが許可されているか確認
-- デフォルトでは以下のIPアドレスが許可されています：
+- デフォルトでは以下のIPアドレスが許可されています
   - `192.168.0.15` (デフォルト設定)
   - `localhost`
   - `127.0.0.1`
 
-**新しいIPアドレスを追加する方法:**
+新しいIPアドレスを追加する方法:
 
-`flutter-app/ios/Runner/Info.plist` の `NSExceptionDomains` に以下を追加：
+`flutter-app/ios/Runner/Info.plist` の `NSExceptionDomains` に以下を追加
 
 ```xml
 <key>192.168.0.20</key>
@@ -678,16 +946,16 @@ lsof -i :8080
 
 #### iOS固有のエラー
 
-- **エラー: "App Transport Security has blocked a cleartext HTTP"**
+- エラー: "App Transport Security has blocked a cleartext HTTP"
 
-**原因**: 使用しようとしているIPアドレスが `NSExceptionDomains` に登録されていない
+原因: 使用しようとしているIPアドレスが `NSExceptionDomains` に登録されていない
 
-**解決方法**:
+解決方法:
 
 1. `flutter-app/ios/Runner/Info.plist` に該当IPアドレスを追加
 2. アプリを再ビルド
 
-**設定が反映されない場合**:
+設定が反映されない場合:
 
 ```bash
 cd flutter-app
@@ -737,7 +1005,7 @@ flutter run
 
 #### サーバー側
 
-- **1. HTTPS を使用**
+- HTTPS を使用
 
 ```yaml
 server:
@@ -747,28 +1015,28 @@ server:
     key-store-password: ${SSL_PASSWORD}
 ```
 
-- **2. データベースを本番用に変更**
+- データベースを本番用に変更
 
 - H2 → PostgreSQL / MySQL
 - 適切なバックアップ戦略
 
-- **3. CORS設定を厳格化**
+- CORS設定を厳格化
 
 ```java
 @CrossOrigin(origins = "https://app.example.com")
 ```
 
-- **4. 認証・認可の実装**
+- 認証・認可の実装
 
 - Spring Security
 - JWT トークン
 
 #### クライアント側
 
-- **1. HTTPS を使用**
+- HTTPS を使用
   - HTTP は開発環境のみ
 
-- **2. Android: Network Security Configuration を厳格化**
+- Android: Network Security Configuration を厳格化
 
 ```xml
 <domain-config cleartextTrafficPermitted="false">
@@ -776,7 +1044,7 @@ server:
 </domain-config>
 ```
 
-- **3. iOS: NSExceptionDomains から開発用IPを削除**
+- iOS: NSExceptionDomains から開発用IPを削除
 
 ```xml
 <key>NSAppTransportSecurity</key>
@@ -787,7 +1055,7 @@ server:
 </dict>
 ```
 
-- **4. 証明書ピンニングの実装**
+- 証明書ピンニングの実装
 
 ---
 
@@ -842,15 +1110,15 @@ flutter build ios --dart-define=API_BASE_URL=https://api.example.com
 
 ### サーバー側
 
-- **H2インメモリDB**: 高速なデータアクセス
-- **JPA キャッシング**: エンティティキャッシュによる最適化
-- **インデックス**: `deviceId` と `timestamp` にインデックス設定
+- H2インメモリDB: 高速なデータアクセス
+- JPA キャッシング: エンティティキャッシュによる最適化
+- インデックス: `deviceId` と `timestamp` にインデックス設定
 
 ### クライアント側
 
-- **非同期処理**: すべてのネットワーク通信は非同期
-- **タイムアウト設定**: 30秒のデフォルトタイムアウト
-- **エラーハンドリング**: 適切なリトライとフォールバック
+- 非同期処理: すべてのネットワーク通信は非同期
+- タイムアウト設定: 30秒のデフォルトタイムアウト
+- エラーハンドリング: 適切なリトライとフォールバック
 
 ---
 
