@@ -24,64 +24,84 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            height: 100vh;
+            overflow: hidden;
+            padding: 10px;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 100%;
+            height: calc(100vh - 20px);
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
+            border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px;
+            padding: 15px 20px;
             text-align: center;
+            flex-shrink: 0;
         }
         
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 1.8em;
+            margin: 0;
         }
         
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            padding: 30px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 10px 15px;
             background: #f8f9fa;
+            flex-shrink: 0;
         }
         
         .stat-card {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 10px;
+            border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
         
         .stat-card h3 {
             color: #667eea;
-            font-size: 2em;
-            margin-bottom: 5px;
+            font-size: 1.5em;
+            margin-bottom: 3px;
+        }
+        
+        .stat-card p {
+            font-size: 0.85em;
+            margin: 0;
         }
         
         .content {
-            padding: 30px;
+            padding: 10px 15px;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .content h2 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
         }
         
         .locations-table {
             width: 100%;
             border-collapse: collapse;
             background: white;
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-size: 0.85em;
         }
         
         .locations-table thead {
@@ -91,7 +111,7 @@
         
         .locations-table th,
         .locations-table td {
-            padding: 15px;
+            padding: 8px 10px;
             text-align: left;
         }
         
@@ -102,53 +122,65 @@
         .device-badge {
             background: #667eea;
             color: white;
-            padding: 5px 10px;
+            padding: 3px 8px;
             border-radius: 5px;
             font-size: 0.9em;
         }
         
         /* Map Styles */
         .map-container {
-            padding: 30px;
+            padding: 10px 15px;
             background: white;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .map-container h2 {
+            font-size: 1.2em;
+            margin-bottom: 8px;
         }
         
         #map {
-            height: 600px;
+            flex: 1;
+            min-height: 300px;
             width: 100%;
-            border-radius: 10px;
+            border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            margin-bottom: 8px;
         }
         
         .map-controls {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 8px;
             flex-wrap: wrap;
             align-items: center;
+            flex-shrink: 0;
         }
         
         .control-group {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 5px;
         }
         
         .control-group label {
             font-weight: 600;
             color: #667eea;
+            font-size: 0.85em;
         }
         
         .control-group select,
         .control-group button {
-            padding: 8px 15px;
+            padding: 5px 10px;
             border: 2px solid #667eea;
             border-radius: 5px;
             background: white;
             color: #667eea;
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 0.8em;
             transition: all 0.3s;
         }
         
@@ -165,50 +197,58 @@
         
         .legend {
             background: white;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 8px;
+            border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            margin-bottom: 8px;
+            flex-shrink: 0;
         }
         
         .legend h3 {
             color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+            margin-bottom: 5px;
+            font-size: 0.95em;
         }
         
         .legend-items {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 10px;
         }
         
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 5px;
+            font-size: 0.85em;
         }
         
         .legend-color {
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             border: 2px solid #333;
         }
         
         .timeline-container {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 8px;
+            border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+        
+        .timeline-container h3 {
+            font-size: 0.95em;
+            margin-bottom: 5px;
         }
         
         .timeline-controls {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-bottom: 5px;
         }
         
         .timeline-slider {
@@ -240,18 +280,19 @@
         }
         
         .play-button {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             background: #667eea;
             color: white;
             border: none;
             cursor: pointer;
-            font-size: 1.2em;
+            font-size: 1em;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
+            flex-shrink: 0;
         }
         
         .play-button:hover {
@@ -262,23 +303,30 @@
         .timeline-info {
             color: #667eea;
             font-weight: 600;
-            min-width: 200px;
+            min-width: 120px;
             text-align: center;
+            font-size: 0.8em;
         }
         
         .speed-control {
             display: flex;
-            gap: 5px;
+            gap: 3px;
+            align-items: center;
+        }
+        
+        .speed-control span {
+            font-size: 0.8em;
+            margin-right: 5px;
         }
         
         .speed-btn {
-            padding: 5px 10px;
+            padding: 3px 8px;
             border: 2px solid #667eea;
             border-radius: 5px;
             background: white;
             color: #667eea;
             cursor: pointer;
-            font-size: 0.85em;
+            font-size: 0.75em;
         }
         
         .speed-btn.active {
@@ -350,44 +398,13 @@
                     <div class="timeline-info" id="timelineInfo">現在時刻</div>
                 </div>
                 <div class="speed-control">
-                    <span style="color: #667eea; font-weight: 600; margin-right: 10px;">再生速度:</span>
+                    <span>速度:</span>
                     <button class="speed-btn" onclick="setSpeed(0.5)">0.5x</button>
                     <button class="speed-btn active" onclick="setSpeed(1)">1x</button>
                     <button class="speed-btn" onclick="setSpeed(2)">2x</button>
                     <button class="speed-btn" onclick="setSpeed(5)">5x</button>
                 </div>
             </div>
-        </div>
-        
-        <div class="content">
-            <h2>📍 最新の位置情報</h2>
-            
-            <table th:if="${!locations.isEmpty()}" class="locations-table">
-                <thead>
-                    <tr>
-                        <th>デバイスID</th>
-                        <th>緯度</th>
-                        <th>経度</th>
-                        <th>高度</th>
-                        <th>RSSI</th>
-                        <th>タイムスタンプ (JST)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="location : ${locations}">
-                        <td>
-                            <span class="device-badge" th:text="${location.deviceId}"></span>
-                        </td>
-                        <td th:text="${#numbers.formatDecimal(location.latitude, 1, 6)}"></td>
-                        <td th:text="${#numbers.formatDecimal(location.longitude, 1, 6)}"></td>
-                        <td th:text="${location.altitude != null ? #numbers.formatDecimal(location.altitude, 1, 1) + 'm' : '-'}"></td>
-                        <td th:text="${location.rssi != null ? location.rssi + ' dBm' : '-'}"></td>
-                        <td th:text="${location.timestampJst}"></td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <p th:if="${locations.isEmpty()}">データがありません</p>
         </div>
     </div>
     

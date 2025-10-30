@@ -63,7 +63,7 @@ BLEデバイスから位置情報を収集し、リアルタイムで追跡・�
 
 ### サーバー側（Spring Boot）
 
-![サーバー画面](./images/server.png)
+![サーバー画面](./images/server.gif)
 
 - RESTful API による位置情報の管理
 - H2 インメモリデータベースでのデータ永続化
