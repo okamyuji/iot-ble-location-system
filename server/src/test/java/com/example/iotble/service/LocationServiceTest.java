@@ -36,6 +36,7 @@ import com.example.iotble.repository.LocationRepository;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("LocationService テスト")
+@SuppressWarnings("null")
 class LocationServiceTest {
 
     @Mock

@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @WebMvcTest(LocationController.class)
 @DisplayName("LocationController テスト")
+@SuppressWarnings("null")
 class LocationControllerTest {
 
     @Autowired

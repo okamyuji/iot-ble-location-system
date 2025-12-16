@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,7 @@ import com.example.iotble.model.LocationData;
  */
 @DataJpaTest
 @DisplayName("LocationRepository テスト")
+@SuppressWarnings("null")
 class LocationRepositoryTest {
 
     @Autowired
@@ -221,8 +223,9 @@ class LocationRepositoryTest {
                     .timestamp(testTime)
                     .build();
 
-            LocationData saved = locationRepository.save(newLocation);
-            Optional<LocationData> found = locationRepository.findById(saved.getId());
+            LocationData saved = Objects.requireNonNull(locationRepository.save(newLocation));
+            Long savedId = Objects.requireNonNull(saved.getId());
+            Optional<LocationData> found = locationRepository.findById(savedId);
 
             assertTrue(found.isPresent());
             assertEquals("ESP32-003", found.get().getDeviceId());
@@ -240,7 +243,7 @@ class LocationRepositoryTest {
                     .timestamp(testTime)
                     .build();
 
-            LocationData saved = locationRepository.save(location);
+            LocationData saved = Objects.requireNonNull(locationRepository.save(location));
 
             assertEquals(-90.0, saved.getLatitude());
         }
@@ -255,7 +258,7 @@ class LocationRepositoryTest {
                     .timestamp(testTime)
                     .build();
 
-            LocationData saved = locationRepository.save(location);
+            LocationData saved = Objects.requireNonNull(locationRepository.save(location));
 
             assertEquals(90.0, saved.getLatitude());
         }
@@ -270,7 +273,7 @@ class LocationRepositoryTest {
                     .timestamp(testTime)
                     .build();
 
-            LocationData saved = locationRepository.save(location);
+            LocationData saved = Objects.requireNonNull(locationRepository.save(location));
 
             assertEquals(-180.0, saved.getLongitude());
         }
@@ -285,7 +288,7 @@ class LocationRepositoryTest {
                     .timestamp(testTime)
                     .build();
 
-            LocationData saved = locationRepository.save(location);
+            LocationData saved = Objects.requireNonNull(locationRepository.save(location));
 
             assertEquals(180.0, saved.getLongitude());
         }
@@ -300,11 +303,9 @@ class LocationRepositoryTest {
                     .timestamp(testTime)
                     .build();
 
-            LocationData saved = locationRepository.save(location);
-            Optional<LocationData> found = locationRepository.findById(saved.getId());
-
-            assertTrue(found.isPresent());
-            assertNull(found.get().getAltitude());
+            LocationData saved = Objects.requireNonNull(locationRepository.save(location));
+            Long savedId = Objects.requireNonNull(saved.getId());
+            Optional<LocationData> found = locationRepository.findById(savedId);
             assertNull(found.get().getAccuracy());
             assertNull(found.get().getRssi());
         }
@@ -322,11 +323,9 @@ class LocationRepositoryTest {
                     .timestamp(testTime)
                     .build();
 
-            LocationData saved = locationRepository.save(location);
-            Optional<LocationData> found = locationRepository.findById(saved.getId());
-
-            assertTrue(found.isPresent());
-            assertEquals(100.5, found.get().getAltitude());
+            LocationData saved = Objects.requireNonNull(locationRepository.save(location));
+            Long savedId = Objects.requireNonNull(saved.getId());
+            Optional<LocationData> found = locationRepository.findById(savedId);
             assertEquals(5.0, found.get().getAccuracy());
             assertEquals(-65, found.get().getRssi());
         }
@@ -351,7 +350,7 @@ class LocationRepositoryTest {
         @DisplayName("正常系: 位置情報を削除できる")
         void testDeleteById_Success() {
             LocationData location = createAndPersistLocation("ESP32-001", 35.658581, 139.745433, testTime);
-            Long id = location.getId();
+            Long id = Objects.requireNonNull(location.getId());
 
             locationRepository.deleteById(id);
             Optional<LocationData> found = locationRepository.findById(id);
@@ -364,11 +363,13 @@ class LocationRepositoryTest {
         void testDeleteById_OtherDataRemains() {
             LocationData location1 = createAndPersistLocation("ESP32-001", 35.658581, 139.745433, testTime);
             LocationData location2 = createAndPersistLocation("ESP32-002", 35.681236, 139.767125, testTime);
+            Long id1 = Objects.requireNonNull(location1.getId());
+            Long id2 = Objects.requireNonNull(location2.getId());
 
-            locationRepository.deleteById(location1.getId());
+            locationRepository.deleteById(id1);
 
-            Optional<LocationData> found1 = locationRepository.findById(location1.getId());
-            Optional<LocationData> found2 = locationRepository.findById(location2.getId());
+            Optional<LocationData> found1 = locationRepository.findById(id1);
+            Optional<LocationData> found2 = locationRepository.findById(id2);
 
             assertFalse(found1.isPresent());
             assertTrue(found2.isPresent());

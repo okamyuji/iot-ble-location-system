@@ -2,6 +2,7 @@ package com.example.iotble.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -113,6 +114,9 @@ public class LocationServiceImpl implements LocationService {
     @Override
     @Transactional(readOnly = true)
     public Optional<LocationData> getLocationById(Long id) {
+        if (id == null) {
+            return Optional.empty();
+        }
         return locationRepository.findById(id);
     }
 
@@ -135,6 +139,7 @@ public class LocationServiceImpl implements LocationService {
      */
     @Override
     public boolean deleteLocation(Long id) {
+        Objects.requireNonNull(id, "ID must not be null");
         if (locationRepository.existsById(id)) {
             locationRepository.deleteById(id);
             log.info("位置情報を削除しました: ID={}", id);
