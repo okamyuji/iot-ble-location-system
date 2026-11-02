@@ -1,0 +1,20 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # server/ is a Java (Maven) service and is not built here
+  app:
+    uses: okamyuji/reusable-workflows/.github/workflows/flutter-ci.yml@v1
+    with:
+      # pubspec.lock was resolved with this Flutter; a newer SDK can change its pinned packages and fail --enforce-lockfile
+      flutter-version: "3.47.9"
+      working-directory: flutter-app
+
+  security:
+    uses: okamyuji/reusable-workflows/.github/workflows/security-scan.yml@v1
