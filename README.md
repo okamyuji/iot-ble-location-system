@@ -475,8 +475,6 @@ iOSでは App Transport Security (ATS) により、デフォルトでHTTP通信�
       <true/>
       <key>NSIncludesSubdomains</key>
       <false/>
-      <key>NSExceptionMinimumTLSVersion</key>
-      <string>TLSv1.0</string>
     </dict>
   </dict>
 </dict>
