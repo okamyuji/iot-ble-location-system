@@ -1,42 +1,49 @@
 PODS:
   - Flutter (1.0.0)
-  - flutter_ble_peripheral (0.0.3):
+  - flutter_ble_peripheral (2.1.1):
     - Flutter
+    - FlutterMacOS
   - flutter_blue_plus_darwin (0.0.2):
     - Flutter
     - FlutterMacOS
   - geolocator_apple (1.2.0):
     - Flutter
     - FlutterMacOS
-  - permission_handler_apple (9.3.0):
+  - package_info_plus (0.4.5):
+    - Flutter
+  - permission_handler_apple (9.4.8):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - flutter_ble_peripheral (from `.symlinks/plugins/flutter_ble_peripheral/ios`)
+  - flutter_ble_peripheral (from `.symlinks/plugins/flutter_ble_peripheral/darwin`)
   - flutter_blue_plus_darwin (from `.symlinks/plugins/flutter_blue_plus_darwin/darwin`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
   flutter_ble_peripheral:
-    :path: ".symlinks/plugins/flutter_ble_peripheral/ios"
+    :path: ".symlinks/plugins/flutter_ble_peripheral/darwin"
   flutter_blue_plus_darwin:
     :path: ".symlinks/plugins/flutter_blue_plus_darwin/darwin"
   geolocator_apple:
     :path: ".symlinks/plugins/geolocator_apple/darwin"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
 
 SPEC CHECKSUMS:
-  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_ble_peripheral: 6241cd70cab105c88472f4260976ee7292523909
-  flutter_blue_plus_darwin: 20a08bfeaa0f7804d524858d3d8744bcc1b6dbc3
+  Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
+  flutter_ble_peripheral: e171bf477ca5f54b8bd21f9921b3e5d64595b69c
+  flutter_blue_plus_darwin: ee2377ea51a6c9e481f2ed76ec597717ef5d287d
   geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
-  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+  permission_handler_apple: 92d754bbaa7361d436db2d6c3c1c2a0fdcec462e
 
-PODFILE CHECKSUM: 639c372a418223ebf1bc084fc746b470190c15a6
+PODFILE CHECKSUM: 898b259f509dede85e976fd94d5cb8571b5610f0
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.17.0

@@ -114,11 +114,10 @@ class BlePeripheralService {
 
       // アドバタイジング開始
       await _peripheral.start(
-        advertiseData: AdvertiseData(
+        advertiseData: AdvertiseDataCore(
           serviceUuid: AppConfig.locationServiceUuid,
           localName: 'IoT-BLE-${location.deviceId.substring(0, 4)}',
           manufacturerData: utf8.encode(jsonData),
-          includeDeviceName: false,
         ),
       );
 
