@@ -185,8 +185,11 @@ class FlutterBleAdapter implements BleAdapter {
 
     debugPrint('[BLE] デバイスに接続中...');
     try {
+      // flutter_blue_plus 2 は利用の区分を必須にした。MIT で公開する個人のプロジェクトなので nonprofit
       await device.connect(
-          autoConnect: false, timeout: const Duration(seconds: 10));
+          license: License.nonprofit,
+          autoConnect: false,
+          timeout: const Duration(seconds: 10));
       _connectedDevices[deviceId] = device;
       debugPrint('[BLE] 接続成功');
     } catch (e, stackTrace) {
