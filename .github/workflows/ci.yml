@@ -13,7 +13,7 @@ jobs:
     uses: okamyuji/reusable-workflows/.github/workflows/flutter-ci.yml@v1
     with:
       # pubspec.lock was resolved with this Flutter; a newer SDK can change its pinned packages and fail --enforce-lockfile
-      flutter-version: "3.50.0"
+      flutter-version: "3.47.9"
       working-directory: flutter-app
 
   security:
