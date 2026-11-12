@@ -33,6 +33,7 @@ dependencies:
   
   # 日時フォーマット
   intl: ^0.20.3
+  material_ui: ^1.11.0
 
 dev_dependencies:
   flutter_test:
